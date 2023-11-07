@@ -1,0 +1,47 @@
+image_list = dir('./*.jpeg')
+
+disp(length(image_list))
+
+imageFileNames = {};
+
+for i = 1:length(image_list)
+   filename = image_list(i).name;
+
+   imageFileNames = [imageFileNames, filename];
+end
+
+% disp(strcat(images.folder, images.name))
+
+% disp(images.name)
+
+% imageFileNames = imread(images.name);
+
+[imagePoints, boardSize] = detectCheckerboardPoints(imageFileNames);
+
+% images.name
+%% 
+I = imread("./../calibration/saved_pypylon_img_zlns.jpeg");
+imageSize = [size(I, 1), size(I, 2)];
+params = estimateCameraParameters(imagePoints, worldPoints, ...
+    'ImageSize', imageSize);
+
+%% 
+
+
+squareSizeInMM = 29;
+worldPoints = generateCheckerboardPoints(boardSize, squareSizeInMM);
+
+figure;
+imshow(imageFileNames{1});
+hold on;
+plot(imagePoints(:, 1, 1), imagePoints(:, 2, 1), 'go');
+plot(params.ReprojectedPoints(:, 1, 1), params.ReprojectedPoints(:, 2, 1), 'r+');
+legend('Detected Points', 'ReprojectedPoints');
+
+hold off;
+
+%% 
+I = imread("./../calibration/saved_pypylon_img_zlns.jpeg");
+J1 = undistortImage(I, cameraParams);
+figure; imshowpair(I, J1, 'montage');
+title('Original ')
